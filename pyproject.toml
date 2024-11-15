@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "voca-project-be"
+version = "0.1.0"
+description = ""
+authors = ["Rosaly-J <seohwi327@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.5"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+alembic = "^1.14.0"
+sqlalchemy = "^2.0.36"
+redis = "^5.2.0"
+python-dotenv = "^1.0.1"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.6.1"
+asyncpg = "^0.30.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
