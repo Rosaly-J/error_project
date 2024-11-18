@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # FastAPI 서비스
+  fastapi:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://user:password@localhost:5432/voca
+    networks:
+      - app_network
+
+  # PostgreSQL 서비스
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: hwi
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: voca
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  pg_data:
+
+networks:
+  app_network:
+    driver: bridge
