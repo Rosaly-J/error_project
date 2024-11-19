@@ -1,5 +1,8 @@
 import httpx
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token"
 KAKAO_USER_URL = "https://kapi.kakao.com/v2/user/me"
@@ -10,7 +13,12 @@ class KakaoOAuthService:
         self.client_id = client_id
         self.redirect_uri = redirect_uri
 
-    async def get_access_token(self, code: str):
+    def get_login_url(self) -> str:
+        """카카오 로그인 URL 생성"""
+        url = f"https://kauth.kakao.com/oauth/authorize?client_id={self.client_id}&redirect_uri={self.redirect_uri}&response_type=code"
+        return url
+
+    async def get_access_token(self, code: str) -> str:
         async with httpx.AsyncClient() as client:
             try:
                 # Kakao에서 access token 요청
@@ -64,6 +72,7 @@ class KakaoOAuthService:
 
 
 # 환경 변수에서 Kakao client_id와 redirect_uri를 가져오는 방법
+
 def get_kakao_service() -> KakaoOAuthService:
     client_id = os.getenv("KAKAO_CLIENT_ID")
     redirect_uri = os.getenv("KAKAO_REDIRECT_URI")

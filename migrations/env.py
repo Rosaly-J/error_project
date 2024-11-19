@@ -8,6 +8,11 @@ from database.db import Base # db.py에서 Base 가져오기
 import warnings
 
 from alembic import context
+from app.database.db import SQLALCHEMY_DATABASE_URL
+
+
+config = context.config
+fileConfig(config.config_file_name)
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 # this is the Alembic Config object, which provides
@@ -20,6 +25,8 @@ fileConfig(config.config_file_name)
 settings = Settings()
 SQLALCHEMY_DATABASE_URL = settings.database_url  # settings에서 불러오는 PostgreSQL 연결 URL
 target_metadata = Base.metadata
+
+config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -39,7 +46,6 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
 
 # engine 생성
 def run_migrations_offline():
@@ -68,6 +74,9 @@ connectable = create_async_engine(SQLALCHEMY_DATABASE_URL, future=True)
 
 # engine 생성
 async def run_migrations_online():
+
+    connectable = create_async_engine(SQLALCHEMY_DATABASE_URL, future=True)
+
     async with connectable.connect() as connection:
         await connection.run_sync(
             lambda sync_connection: context.configure(
