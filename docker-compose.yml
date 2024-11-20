@@ -27,6 +27,15 @@ services:
     networks:
       - app_network
 
+  # Redis 서비스 추가
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - "6379:6379"  # Redis 포트 설정
+    networks:
+      - app_network
+
 volumes:
   pg_data:
 

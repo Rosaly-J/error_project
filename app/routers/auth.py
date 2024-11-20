@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.services.kakao_oauth import KakaoOAuthService, get_kakao_service
-from app.services.user_service import get_user_by_kakao_id, create_user
+from app.services.user_service import create_user
 from app.database.db import get_db  # SQLAlchemy 세션 가져오는 함수
-from app.utils.utils import create_jwt_token  # JWT 발급 함수
+from app.utils.utils import create_jwt_token, delete_access_token  # JWT 발급 함수
 from app.models.models import User
 
 router = APIRouter()
@@ -60,3 +60,18 @@ async def kakao_callback(
         raise HTTPException(status_code=400, detail=f"Invalid data: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+@router.post("/auth/logout")
+async def logout(authorization: str = Header(None)):
+    """로그아웃: Redis에서 엑세스 토큰 삭제"""
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    # Bearer 토큰 추출
+    token = authorization.split(" ")[1] if authorization.startswith("Bearer ") else None
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid token format")
+
+    # 토큰 삭제
+    return delete_access_token(token)
