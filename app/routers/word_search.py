@@ -3,7 +3,6 @@ import httpx
 
 router = APIRouter()
 
-
 # dictionaryapi.dev를 호출하여 단어 정보 가져오기
 async def get_word_info(word: str):
     url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
@@ -21,8 +20,6 @@ async def get_word_info(word: str):
             )
 
         return response.json()
-
-
 
 # /search/word 엔드포인트 구현
 @router.get("/search/word")
