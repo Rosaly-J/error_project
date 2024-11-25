@@ -1,13 +1,13 @@
 import asyncio
 
-from sqlalchemy import Column, Integer, String, create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy import Column, Integer, String
+
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncSession,
-    async_sessionmaker, async_session,
 )
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import sessionmaker
+
 from config.settings import Settings
 from sqlalchemy import MetaData
 from sqlalchemy.ext.declarative import declarative_base
@@ -28,7 +28,7 @@ engine = create_async_engine(
 )
 
 # AsyncSessionLocal 설정
-AsyncSessionLocal = async_sessionmaker(
+AsyncSessionLocal = sessionmaker(
     engine,
     autocommit=False,
     expire_on_commit=False,
@@ -43,9 +43,6 @@ naming_convention = {
     "fk": "%(table_name)s_%(column_0_name)s_fkey",
     "pk": "%(table_name)s_pkey",
 }
-
-# 세션 생성
-# SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # 의존성으로 사용할 DB 세션 생성 함수
 async def get_db() -> AsyncSession:

@@ -1,7 +1,10 @@
-from sqlalchemy import Column, Integer, String, TIMESTAMP
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, BigInteger, String, TIMESTAMP, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from datetime import datetime
+from app.database.db import Base
+import uuid
 
 # 비동기 엔진 설정
 DATABASE_URL = "postgresql+asyncpg://hwi:1234@localhost/voca"
@@ -12,10 +15,10 @@ AsyncSessionLocal = sessionmaker(
     engine, class_=AsyncSession, expire_on_commit=False
 )
 
-Base = declarative_base()
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     kakao_id = Column(Integer, unique=True, nullable=False)  # 카카오 고유 ID
@@ -24,19 +27,18 @@ class User(Base):
     password = Column(String, nullable=True)               # 쇼설 로그인이라 이쪽에서 관리 안해서 nullable=True
     created_at = Column(TIMESTAMP, server_default="CURRENT_TIMESTAMP")  # 생성 날짜
 
-# 테이블 생성 함수
-async def create_tables():
-    async with engine.begin() as conn:
-        # 테이블 생성
-        await conn.run_sync(Base.metadata.create_all)
+    search_histories = relationship("SearchHistory", back_populates="user")
 
-# FastAPI 애플리케이션에서 서버 실행 시 테이블을 생성하는 코드 추가
-import asyncio
 
-async def startup():
-    await create_tables()
+class SearchHistory(Base):
+    __tablename__ = "search_history"
+    __table_args__ = {'extend_existing': True}
 
-# 서버 실행 시 호출되도록 FastAPI에 통합 예시
-from fastapi import FastAPI
+    search_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(BigInteger, ForeignKey("users.id"), index=True)  # ForeignKey로 관계 설정
+    search_term = Column(String(255), index=True)
+    search_date = Column(DateTime, default=datetime.utcnow)
+    notification_id = Column(UUID(as_uuid=True), default=uuid.uuid4)
 
-app = FastAPI(on_startup=[startup])  # 서버 시작 시 테이블 생성
+    # 관계 설정
+    user = relationship("User", back_populates="search_histories")
